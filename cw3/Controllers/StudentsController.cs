@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace cw3.Controllers
 {
-    [Route("api/students")]
     [ApiController]
+    [Route("api/students")]
     public class StudentsController : ControllerBase
     {
         [HttpGet]
         public string GetStudents(string orderBy)
         {
-            return "Jan, Anna, Krzysztof";
+            return $"Kowalski, Malewski, Andrzejewski sortowanie={orderBy}";
         }
 
         [HttpGet("{id}")]
@@ -21,10 +21,13 @@ namespace cw3.Controllers
         {
             if (id == 1)
             {
-                return Ok("Jan");
+                return Ok("Kowalski");
+            } else if (id == 2)
+            {
+                return Ok("Malewski");
             }
 
-            return NotFound("Student was not found");
+            return NotFound("Nie znaleziono studenta");
         }
     }
 }
