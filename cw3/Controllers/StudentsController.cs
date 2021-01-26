@@ -3,6 +3,7 @@ using cw3.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,12 +20,40 @@ namespace cw3.Controllers
             _dbService = service;
         }
 
-        [HttpGet]
-        public IActionResult GetStudents(string orderBy)
-        {
-            return Ok(_dbService.GetStudents());
-        }
+        private const string ConString = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=s13812;Integrated Security=True";
 
+        [HttpGet]
+        public IActionResult GetStudents()
+        {
+            //return Ok(_dbService.GetStudents());
+            var list = new List<Student>();
+
+            using (var con = new SqlConnection(ConString))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                com.CommandText = "select Student.IndexNumber, Student.FirstName, Student.LastName, Student.BirthDate, Studies.Name as StudiesName, Enrollment.Semester " +
+                                  "from Student, Enrollment, Studies " +
+                                  "where Student.IdEnrollment = Enrollment.IdEnrollment and Studies.IdStudy = Enrollment.IdStudy";
+                con.Open();
+                var dr = com.ExecuteReader();
+                while(dr.Read())
+                {
+                    list.Add(new Student
+                    {
+                        IndexNumber = dr["IndexNumber"].ToString(),
+                        FirstName = dr["FirstName"].ToString(),
+                        LastName = dr["LastName"].ToString(),
+                        BirthDate = dr["BirthDate"].ToString(),
+                        StudiesName = dr["StudiesName"].ToString(),
+                        Semester = (int)dr["Semester"]
+                    });
+                }
+            }
+
+            return Ok(list);
+        }
+        
         [HttpGet("{id}")]
         public IActionResult GetStudent(int id)
         {
