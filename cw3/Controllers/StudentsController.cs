@@ -53,18 +53,32 @@ namespace cw3.Controllers
 
             return Ok(list);
         }
-        
-        [HttpGet("{id}")]
-        public IActionResult GetStudent(int id)
-        {
-            if (id == 1)
-            {
-                return Ok("Kowalski");
-            } else if (id == 2)
-            {
-                return Ok("Malewski");
-            }
 
+        [HttpGet("{indexNumber}")]
+        public IActionResult GetStudent(string indexNumber)
+        {
+            using (var con = new SqlConnection(ConString))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                com.CommandText = "select Student.IndexNumber, Enrollment.Semester, Studies.Name, Enrollment.StartDate " +
+                                  "from Student, Enrollment, Studies " +
+                                  "where Student.IndexNumber = '" + indexNumber + "' and Student.IdEnrollment = Enrollment.IdEnrollment and Studies.IdStudy = Enrollment.IdStudy";
+
+                con.Open();
+                var dr = com.ExecuteReader();
+                if (dr.Read())
+                {
+                    var wpis = new Wpis
+                    {
+                        IndexNumber = dr["IndexNumber"].ToString(),
+                        Semester = (int)dr["Semester"],
+                        Name = dr["Name"].ToString(),
+                        StartDate = dr["StartDate"].ToString()
+                    };
+                    return Ok(wpis);
+                }
+            }
             return NotFound("Nie znaleziono studenta");
         }
 
