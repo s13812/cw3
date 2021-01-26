@@ -63,8 +63,8 @@ namespace cw3.Controllers
                 com.Connection = con;
                 com.CommandText = "select Student.IndexNumber, Enrollment.Semester, Studies.Name, Enrollment.StartDate " +
                                   "from Student, Enrollment, Studies " +
-                                  "where Student.IndexNumber = '" + indexNumber + "' and Student.IdEnrollment = Enrollment.IdEnrollment and Studies.IdStudy = Enrollment.IdStudy";
-
+                                  "where Student.IndexNumber = @indexNumber and Student.IdEnrollment = Enrollment.IdEnrollment and Studies.IdStudy = Enrollment.IdStudy";
+                com.Parameters.AddWithValue("indexNumber", indexNumber);
                 con.Open();
                 var dr = com.ExecuteReader();
                 if (dr.Read())
