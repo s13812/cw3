@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using cw3.Models;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,28 @@ namespace cw3.Controllers
             }
 
             return NotFound("Nie znaleziono studenta");
+        }
+
+        [HttpPost]
+        public IActionResult CreateStudent(Student student)
+        {
+            //... add to database
+            student.IndexNumber = $"s{new Random().Next(1, 20000)}";
+            return Ok (student);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateStudent(int id)
+        {
+            //... update in database
+            return Ok("Aktualizacja ukonczona");
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult RemoveStudent(int id)
+        {
+            //... remove from database
+            return Ok("Usuwanie ukonczone");
         }
     }
 }
