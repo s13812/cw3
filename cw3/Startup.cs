@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using cw3.Middleware;
 using cw3.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,6 +29,7 @@ namespace cw3
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IStudentsDbService, SqlServerDbService>();
+            services.AddSingleton<ILoggingService, FileLoggingService>();
             services.AddControllers();
             services.AddSwaggerGen(config =>
             {
@@ -48,6 +50,8 @@ namespace cw3
             {
                 config.SwaggerEndpoint("/swagger/v1/swagger.json", "Students App API");
             });
+
+            app.UseMiddleware<LoggingMiddleware>();
 
             app.Use(async (context, next) => {
                 if (!context.Request.Headers.ContainsKey("Index"))
