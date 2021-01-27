@@ -24,16 +24,16 @@ namespace cw3.Controllers
             {
                 con.Open();
                 var tran = con.BeginTransaction();
-                
+
                 com.Connection = con;
                 com.Transaction = tran;
 
 
                 var response = new EnrollStudentResponse();
-                response.Semester = 1;                
-                
+                response.Semester = 1;
+
                 //sprawdzanie czy studia istnieja
-                
+
                 com.CommandText = "select IdStudy from studies where Name = @name";
                 com.Parameters.AddWithValue("name", request.Studies);
 
@@ -67,7 +67,7 @@ namespace cw3.Controllers
 
                 com.CommandText = "select * from Enrollment where IdStudy = @idstudy and Semester = 1 order by StartDate desc";
                 com.Parameters.AddWithValue("idstudy", response.IdStudy);
-                
+
                 dr = com.ExecuteReader();
                 if (dr.Read())
                 {
@@ -85,7 +85,7 @@ namespace cw3.Controllers
                     {
                         response.IdEnrollment = (int)dr["nextId"];
                     }
-                    dr.Close(); 
+                    dr.Close();
 
                     response.StartDate = DateTime.Now;
                     com.CommandText = "insert into Enrollment values(@idenrollment, 1, @idstudy, @startdate)";
@@ -108,6 +108,49 @@ namespace cw3.Controllers
                 com.ExecuteNonQuery();
 
                 tran.Commit();
+                return Ok(response);
+            }
+        }
+
+        [HttpPost("promotions")]
+        public IActionResult PromoteStudents(PromoteStudentsRequest request)
+        {
+            using (var con = new SqlConnection(ConString))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                con.Open();
+
+                com.CommandText = "select * from Enrollment, Studies where Enrollment.IdStudy = Studies.IdStudy and Enrollment.Semester = @semester and Studies.Name = @studies";
+                com.Parameters.AddWithValue("semester", request.Semester);
+                com.Parameters.AddWithValue("studies", request.Studies);
+
+                var dr = com.ExecuteReader();
+
+                if(!dr.Read())
+                {
+                    return NotFound("Brak wpisu w bazie :(");
+                }
+
+                dr.Close();
+
+                com.CommandText = "exec PromoteStudents @Studies = @studies, @Semester = @semester";
+
+                dr = com.ExecuteReader();
+
+                if (!dr.Read())
+                {
+                    return BadRequest("Something went terribly wrong T.T");
+                }
+
+                var response = new PromoteStudentsResponse
+                {
+                    IdEnrollment = (int)dr["IdEnrollment"],
+                    Semester = (int)dr["Semester"],
+                    IdStudy = (int)dr["IdStudy"],
+                    StartDate = dr["StartDate"].ToString()
+                };
+
                 return Ok(response);
             }            
         }
