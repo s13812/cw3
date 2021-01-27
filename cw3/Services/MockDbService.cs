@@ -35,6 +35,11 @@ namespace cw3.Services
             return _students;
         }
 
+        public bool IsStudentInDb(string indexNumber)
+        {
+            return true;
+        }
+
         public PromoteStudentsResponse PromoteStudents(PromoteStudentsRequest request)
         {
             throw new NotImplementedException();

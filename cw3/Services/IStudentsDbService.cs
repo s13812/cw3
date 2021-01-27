@@ -11,5 +11,6 @@ namespace cw3.Services
         public Enrollment GetEnrollment(string indexNumber);
         public EnrollStudentResponse EnrollStudent(EnrollStudentRequest request);
         public PromoteStudentsResponse PromoteStudents(PromoteStudentsRequest request);
+        public bool IsStudentInDb(string indexNumber);
     }
 }

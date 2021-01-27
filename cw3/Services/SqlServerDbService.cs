@@ -165,6 +165,23 @@ namespace cw3.Services
             return list;
         }
 
+        public bool IsStudentInDb(string indexNumber)
+        {
+            using (var con = new SqlConnection(ConString))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                com.CommandText = "select IndexNumber " +
+                                  "from Student " +
+                                  "where IndexNumber = @indexNumber";
+                com.Parameters.AddWithValue("indexNumber", indexNumber);
+                con.Open();
+                var dr = com.ExecuteReader();
+
+                return dr.Read();
+            }            
+        }
+
         public PromoteStudentsResponse PromoteStudents(PromoteStudentsRequest request)
         {
             using (var con = new SqlConnection(ConString))
