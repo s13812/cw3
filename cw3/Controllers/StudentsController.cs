@@ -1,11 +1,7 @@
-﻿using cw3.DAL;
+﻿using cw3.Services;
 using cw3.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace cw3.Controllers
 {
@@ -13,73 +9,30 @@ namespace cw3.Controllers
     [Route("api/students")]
     public class StudentsController : ControllerBase
     {
-        private IDbService _dbService;
+        private IStudentsDbService _dbService;
 
-        public StudentsController(IDbService service)
+        public StudentsController(IStudentsDbService service)
         {
             _dbService = service;
         }
 
-        private const string ConString = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=s13812;Integrated Security=True";
-
         [HttpGet]
         public IActionResult GetStudents()
         {
-            //return Ok(_dbService.GetStudents());
-            var list = new List<Student>();
-
-            using (var con = new SqlConnection(ConString))
-            using (var com = new SqlCommand())
-            {
-                com.Connection = con;
-                com.CommandText = "select Student.IndexNumber, Student.FirstName, Student.LastName, Student.BirthDate, Studies.Name as StudiesName, Enrollment.Semester " +
-                                  "from Student, Enrollment, Studies " +
-                                  "where Student.IdEnrollment = Enrollment.IdEnrollment and Studies.IdStudy = Enrollment.IdStudy";
-                con.Open();
-                var dr = com.ExecuteReader();
-                while(dr.Read())
-                {
-                    list.Add(new Student
-                    {
-                        IndexNumber = dr["IndexNumber"].ToString(),
-                        FirstName = dr["FirstName"].ToString(),
-                        LastName = dr["LastName"].ToString(),
-                        BirthDate = dr["BirthDate"].ToString(),
-                        StudiesName = dr["StudiesName"].ToString(),
-                        Semester = (int)dr["Semester"]
-                    });
-                }
-            }
-
-            return Ok(list);
+            return Ok(_dbService.GetStudents());            
         }
 
         [HttpGet("{indexNumber}")]
         public IActionResult GetStudent(string indexNumber)
         {
-            using (var con = new SqlConnection(ConString))
-            using (var com = new SqlCommand())
+            try
             {
-                com.Connection = con;
-                com.CommandText = "select Student.IndexNumber, Enrollment.Semester, Studies.Name, Enrollment.StartDate " +
-                                  "from Student, Enrollment, Studies " +
-                                  "where Student.IndexNumber = @indexNumber and Student.IdEnrollment = Enrollment.IdEnrollment and Studies.IdStudy = Enrollment.IdStudy";
-                com.Parameters.AddWithValue("indexNumber", indexNumber);
-                con.Open();
-                var dr = com.ExecuteReader();
-                if (dr.Read())
-                {
-                    var wpis = new Wpis
-                    {
-                        IndexNumber = dr["IndexNumber"].ToString(),
-                        Semester = (int)dr["Semester"],
-                        Name = dr["Name"].ToString(),
-                        StartDate = dr["StartDate"].ToString()
-                    };
-                    return Ok(wpis);
-                }
+                return Ok(_dbService.GetEnrollment(indexNumber));
             }
-            return NotFound("Nie znaleziono studenta");
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpPost]
