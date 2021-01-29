@@ -2,10 +2,11 @@
 using cw3.DTOs.Requests;
 using Microsoft.AspNetCore.Mvc;
 using cw3.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace cw3.Controllers
 {
-    [Route("api/enrollments")]
+    [Route("api/enrollments")]   
     [ApiController]
     public class EnrollmentsController : ControllerBase
     {
@@ -20,6 +21,7 @@ namespace cw3.Controllers
         private const string ConString = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=s13812;Integrated Security=True";
 
         [HttpPost]
+        [Authorize(Roles = "employee")]
         public IActionResult EnrollStudent(EnrollStudentRequest request)
         {
             try
@@ -37,6 +39,7 @@ namespace cw3.Controllers
         }
 
         [HttpPost("promotions")]
+        [Authorize(Roles = "employee")]
         public IActionResult PromoteStudents(PromoteStudentsRequest request)
         {
             try

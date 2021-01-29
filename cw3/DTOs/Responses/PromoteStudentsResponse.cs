@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace cw3.DTOs.Responses
+﻿namespace cw3.DTOs.Responses
 {
     public class PromoteStudentsResponse
     {

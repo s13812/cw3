@@ -1,4 +1,5 @@
-﻿using cw3.DTOs.Requests;
+﻿using cw3.DTOs;
+using cw3.DTOs.Requests;
 using cw3.DTOs.Responses;
 using cw3.Exceptions;
 using cw3.Models;
@@ -135,6 +136,63 @@ namespace cw3.Services
             throw new RequestException("Nie znaleziono studenta", 404);
         }
 
+        public LoginDetailsDTO GetLoginDetails(string indexNumber)
+        {            
+            using (var con = new SqlConnection(ConString))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                com.CommandText = "select Password, Salt, Role " +
+                                  "from Student " +
+                                  "where IndexNumber = @indexNumber";
+                com.Parameters.AddWithValue("indexNumber", indexNumber);
+                con.Open();
+                var dr = com.ExecuteReader();
+                if (dr.Read())
+                {
+                    var response = new LoginDetailsDTO
+                    {
+                        IndexNumber = indexNumber,
+                        HashedPassword = dr["Password"].ToString(),
+                        Salt = dr["Salt"].ToString(),
+                        Role = dr["Role"].ToString()
+                    };
+                    return response;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public LoginDetailsDTO GetLoginDetailsFromRefreshToken(string refToken)
+        {
+            using (var con = new SqlConnection(ConString))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                com.CommandText = "select IndexNumber, Role " +
+                                  "from Student " +
+                                  "where RefreshToken = @refToken";
+                com.Parameters.AddWithValue("refToken", refToken);
+                con.Open();
+                var dr = com.ExecuteReader();   
+                if (dr.Read())
+                {
+                    return new LoginDetailsDTO
+                    {
+                        IndexNumber = dr["IndexNumber"].ToString(),
+                        Role = dr["Role"].ToString()
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         public IEnumerable<Student> GetStudents()
         {
             var list = new List<Student>();
@@ -221,6 +279,22 @@ namespace cw3.Services
                 };
 
                 return response;
+            }
+        }
+
+        public void SetRefreshToken(string indexNumber, string refreshToken)
+        {
+            using (var con = new SqlConnection(ConString))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                com.CommandText = "update Student " +
+                                  "set RefreshToken = @refreshToken " +
+                                  "where IndexNumber = @indexNumber";
+                com.Parameters.AddWithValue("indexNumber", indexNumber);
+                com.Parameters.AddWithValue("refreshToken", refreshToken);
+                con.Open();
+                var dr = com.ExecuteNonQuery();
             }
         }
     }
